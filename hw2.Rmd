@@ -13,6 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 For the graph given, it shows the data of 9 disease cases reported by U.S between 1945 and 2015. i think the author want to show the number of reported case decreased after the vaccine licensed. As we can see, after the year of a vaccine licensed, the number of corresponding disease cases decreased dramatically. The graph provides a visual evidence that vaccines helps to prevent the occurence of corresponding diseases.
 
 ## Part 2: Tradeoffs between different graphical principles
+
+JD: I don't know which principles you are trading off. There is no discussion in this Part.
+
 ```{r}
 library(ggplot2)
 library(directlabels)
@@ -26,6 +29,8 @@ vac_data1 <- (rbind(vaccine_data,fakedata)
 )
 ```
 ## comments on code
+JD: You should not need to drop data (or add data!) to make your plot work. Adding the 0 particularly seems wrong. You could try to find out other options for directlabels instead.
+
 Since the data of 2015 only have information for Rubella. So I dropped the data of 2015. For data of 2014, there are only information for 8 disease, they do not provide information for polio. But I want to use directlabel to indicate each disease on the plot. So I add 0 to polio to make every disease has data at year 2014.
 I used different color points to indicate the vaccine licensed time point.
 ```{r}
@@ -38,6 +43,9 @@ g1 <- (ggplot(vac_data1,aes(year,cases,color=disease))
 )
 direct.label(g1)
 ```
+
+JD: You should never ignore warnings. In this case, it's probably fine to let ggplot fill in the points, but they should be explained in your comments (it's because you have zero values on a log scale).
+
 For the first graph, I put all lines together on the same graph. It is easy to compare the change rate of different disease cases over years.
 Different diseases cases have been distinguished by using different colors. 
 The axis have been transfered from linear scale to log scale, which makes the plot more balanced. 
@@ -49,6 +57,10 @@ print(g1+geom_point(data=vac_data1[which(vac_data1$vaccine!=FALSE),],color="blac
   + facet_wrap(~disease,ncol=3)
 )
 ```
+JD: This text can show up in a weird place.
+
+JD: You need a a paragraph break after this code for readability.
+
 The second graph is pretty similar to the first graph. But it shows plot for each disease individually. It is more clear for analysis the trend for each disease. 
 We can compare 3 plots in the same rows or same columns.Since the x-axis and y-axis is the same for each plot.
 Here, I used black dots to indicate the time when vaccine has been licensed.
@@ -57,3 +69,5 @@ Here, I used black dots to indicate the time when vaccine has been licensed.
 Compared to Jia You's graph, My graphs shows the trends more clearly. In Jia You's graph, she use the size of bubbles to represent number of cases has been reported. The difference of sizes between bubbles which represent 1,000 and 700,000 is not compareable with the diffrence of data magnitude.
 The time has been put on y-axis in the original graph, the trend of data will not be obvious in that way.
 The original plot use the same color to represent different groups of data. Which maybe a little confused to distinguish each disease. Different diseases has been distinguished by different colors in my graphs.
+
+Grade: 2/3 (Good)
