@@ -4,15 +4,21 @@ author: "chenxi yu"
 date: '2019-09-27'
 output: html_document
 ---
+
 # Data description
-The data of this assignment is coming from https://academic.oup.com/aje/article/188/9/1733/5525028. This article analyses the impact and effectiveness of state-level tuberculosis interventions in four different locations. The data is from Table 3 in this paper. The original table shows the projected yields of targeted testing and teatment for tuberculosis in California, Florida, New York, and Texas. It provides data point estimate and 95% confidence interval of different risk type froups from the simulation study.
+
+The data of this assignment is coming from https://academic.oup.com/aje/article/188/9/1733/5525028. This article analyses the impact and effectiveness of state-level tuberculosis interventions in four different locations. The data is from Table 3 in this paper. The original table shows the projected yields of targeted testing and treatment for tuberculosis in California, Florida, New York, and Texas. It provides data point estimate and 95% confidence interval of different risk type groups from the simulation study.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ```{r}
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 ```
+
+**BMB**: it's good to name your code chunks (for debugging purposes)
+
 # load data
 ```{r}
 dd <-read.csv("Table3.csv")
@@ -29,19 +35,16 @@ dd_CI <- (dd
           %>% gather(key="location","CI",-risktype,-info.type)
           %>% separate(CI,c("LL","UL"),sep = "[–]")
 )
-# comebine two subsets together
+# combine two subsets together
 dd2 <- (left_join(dd_PE,dd_CI))
-# delete "," in numerical data of upper limit and lower limit of CI
+## delete "," in numerical data of upper limit and lower limit of CI
+## BMB: had to be a little more drastic
 dd3 <- (dd2
-        %>% mutate(estimates = sub(x=estimates,pattern=",",replacement="")
-                   , estimates = as.numeric(estimates)
-                   , LL = sub(x=LL,pattern=",",replacement="")
-                   , UL = sub(x=UL,pattern=",",replacement="")
-                   , LL = as.numeric(LL)
-                   , UL = as.numeric(UL))
+  %>% mutate_all(~gsub(x=.,pattern="[, _]",replacement=""))
+  %>% mutate_at(c("estimates","LL","UL"),as.numeric)
 )
 ```
-#since it makes no sense to translate the x-axis into contimuous scale, so errorbar drawed instead of a ribbon
+#since it makes no sense to translate the x-axis into continuous scale, so errorbar drawed instead of a ribbon
 ```{r}
 gg <- (ggplot(dd3, aes(x=risktype,y=estimates,color=location))
        + geom_point()
@@ -52,4 +55,27 @@ gg <- (ggplot(dd3, aes(x=risktype,y=estimates,color=location))
 print(gg)
 ```
 # Comments on Plot
-This plot shows etimation of people been affeted under different risk types.The dots stands for point estimates and bars for 95% confidence intervals. Different colors are used to distinguish between different groups. The main disadvantage of this plot is that the information on x-axis cannot be shown clearly. Since the label on x-axis is used to indicate risk types. So the variable is discrete on x-axis. The first two groups of data, which are no. of completing LTBI treatment and no. of active TB diagnosis is laying between a relatively shorter interval compared to no. of person screened. Especially for no. of completing LTBI, we cannot find the difference between risk types obviously.
+This plot shows estimation of people affected under different risk types.The dots stands for point estimates and bars for 95% confidence intervals. Different colors are used to distinguish between different groups. The main disadvantage of this plot is that the information on x-axis cannot be shown clearly. Since the label on x-axis is used to indicate risk types. So the variable is discrete on x-axis. The first two groups of data, which are no. of completing LTBI treatment and no. of active TB diagnosis is laying between a relatively shorter interval compared to no. of person screened. Especially for no. of completing LTBI, we cannot find the difference between risk types obviously.
+
+BMB: 
+
+* colours redundant with facets
+* could have combined info.types into a single facet (e.g with line types?)
+* order: why alphabetical?
+* scale numbers by 1000 for easier reading?
+* default colour scheme?
+* confidence intervals are too small to see on this scale: log scaling? separation into facets with different scales?
+* x-axis labels are unreadable: flip x/y axes?
+
+score: 1.8
+
+This seems much more readable (could still work on ordering, colours, etc.
+
+```{r}
+library(ggstance)
+gg <- (ggplot(dd3, aes(y=risktype,x=estimates,color=location))
+       + geom_pointrangeh(aes(xmin=LL,xmax=UL))
+       + facet_wrap(~info.type,scale="free",ncol=1)
+)
+print(gg)
+```
