@@ -1,0 +1,34 @@
+---
+title: "HW4"
+author: "chenxi yu"
+date: '2019-10-11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The data is from a study which is trying to determine a drug called "dobutamine" coud be used for a test to measuring a patient's risk of having a heart attack, or "cardiac event". The datasets includes information of patient's gender, age and dose of dobutamine, etc. The response variable Y is a binary variable which indicates if any cardiac events happend in the next year.
+
+Here is the website where I find the data: http://biostat.mc.vanderbilt.edu/wiki/Main/DataSets.
+
+I bulit a model. In which the response variable Y has a Binomial distribution. The probability of occurance of event is assumed linearly related to dose, age and gender.
+
+Here is my code:
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+dd <- read.csv("stressEcho.csv")
+event<- dd$any.event
+y <- 1-event
+## since 0 means event occured in the dataser, so changed it to 1 for positive, 0 for negative
+dose <- dd$dose
+age <- dd$age
+gender <- dd$gender
+model<-glm(y ~ dose+age+gender,family="binomial")
+summary(model)
+plot(allEffects(model))
+```
+The plot shows effects of those three predictors on the response variable. As we can see, dose has a positive effect on the event. Women seems have a higher risk of heart attack than men. However, age seems to have a negative effect on the response.
