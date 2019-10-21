@@ -15,11 +15,14 @@ Here is the website where I find the data: http://biostat.mc.vanderbilt.edu/wiki
 
 I bulit a model. In which the response variable Y has a Binomial distribution. The probability of occurance of event is assumed linearly related to dose, age and gender.
 
+JD: Make sure your code runs from beginning to end in a _new_ session (don't forget library statements)
+
 Here is my code:
 ```{r}
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(effects)
 dd <- read.csv("stressEcho.csv")
 event<- dd$any.event
 y <- 1-event
@@ -32,3 +35,7 @@ summary(model)
 plot(allEffects(model))
 ```
 The plot shows effects of those three predictors on the response variable. As we can see, dose has a positive effect on the event. Women seems have a higher risk of heart attack than men. However, age seems to have a negative effect on the response.
+
+JD: Your plots don't really illustrate inference -- and in fact, what you report seems incorrect, since you imply that the dose effect is significant. Finally, I don't understand at all why you would use past heart attacks as a response variable. Is the theory that maybe they had a heart attack because they were going to be given a higher dose in a future trial?
+
+Grade 1.8/3 (OK)
