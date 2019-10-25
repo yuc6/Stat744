@@ -1,0 +1,78 @@
+---
+title: "HW_WEEK6"
+author: "chenxi yu"
+date: '2019-10-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The data is coming from a challenge which is described on the website http://www.storytellingwithdata.com/blog/2019/3/1/swdchallenge-visualize-this-data. The challenge is use this dataset to create visuals to answer the question: Who donates? 
+The dataset contains dononation information for 47 countries between 1973 and 2013. This information include amount of donation, the donor country， the recipient country and on which perspective the donation aid.
+
+Here, I am trying to answer this question with 2 plots.
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+dd <- read.csv("aiddata-countries-only.csv")
+
+dd1 <- filter(dd, amount>10000000)
+#drop the data with small values since they are not visiable in the plot
+
+dd2 <- dd1 %>% 
+  group_by(donor) %>%
+  mutate(total_amount = sum(amount)/10000000)
+#change the scale into billions
+
+gg1 <- (ggplot(dd2)
+       + geom_bar(aes(y=amount,x=reorder(donor,total_amount),fill=recipient),stat="identity")
+       + theme_bw()
+       + coord_flip()
+       + ylab("Total amount of donation received by Countries from 1973-2013 (in billions)")
+       + xlab("Countries")
+       + ggtitle("The Japan, US and Germany are major donors ")
+       + theme(legend.position = "bottom")
+)
+
+print(gg1)
+
+```
+The first plot shows the donation amount donated by each country and who are recipient for the donation. The length of bars represents the amount of donation from the country which is indicated on the y-axis. Different colors represents different recipient countries.From this plot, we can see Japan denotes the most followed by United States, then Germany. They are the top 3 donors.
+Rubics:
+ordering: the order is from the highest amount to lowest amount, so that we can find out who donates the largest amount.
+axis: the axis have been fliped, I think it is more clearly shows the differece in amounts.
+color: different colors used to distingush the donation from different countries.
+Order of legend: The order of legned is alphabetical. I think it does not matter.
+```{r}
+recipient <- dd1%>%
+  group_by(recipient)%>%
+  summarise(gain=sum(amount))%>%
+  select(country=recipient,gain)
+#get the total amount received for each countries among years
+
+donor <- dd1%>%
+  group_by(donor)%>%
+  summarise(loss=sum(amount))%>%
+  select(country=donor,loss)
+#get the total amount donated from each country from 1973-2013
+  
+donation <- full_join(donor,recipient,by="country")%>%
+  mutate(gain = ifelse(is.na(gain),0,gain)
+             , loss=ifelse(is.na(loss),0,loss)
+             , total=gain-loss
+             , net = total*(-1))
+# get the net gain for each country, here net gain= donation amount-received amount, here only countries who are both donor and recipient are considered.
+
+gg2 <- (ggplot(donation,aes(x=reorder(country,net),y=net))
+     + geom_point()+geom_hline(yintercept = 0)
+     + coord_flip()+xlab("Country")
+     + ylab("Donation amount I(in billion USD"))
+
+print(gg2)
+```
+The central line in the plot indicates the value of 0. The dots on the right of the line means this country donates more than it received. The dots on the left side of the line means this country received more than it donates. The countries are ordered according to the amount it donates. Obviously, Japan and US are major donors and India and Thailand are major receivers.
