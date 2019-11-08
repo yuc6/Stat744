@@ -1,0 +1,32 @@
+---
+title: "HW7"
+author: "chenxi yu"
+date: '2019-11-08'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+The data of this plot comes from https://www.kaggle.com/doit-intl/autotel-shared-car-locations.
+It comes from a shared car service.This dataset contains 5 columns: timestamp, latitude, longitude, # total cars and cars list.
+
+I used this dataset made a plot, which shows the parking place for each car and how many cars available in the neibourhood.
+```{r}
+library(tidyverse)
+library(dplyr)
+library(leaflet)
+
+shared_cars<-read.csv("shared_cars.csv")%>%
+  select(c(latitude,longitude,total_cars))%>%
+  filter(total_cars==0)
+leaflet(shared_cars)%>%
+  addProviderTiles(providers$OpenStreetMap.HOT)%>%
+  addMarkers(lng=shared_cars$longitude, lat=shared_cars$latitude,
+             clusterOptions=markerClusterOptions(),popup=paste0(shared_cars$total_cars))
+```
+This plot can help people find the available cars for share easily. The bubble indicates the location for cars and number inside each bubble indicates the total number of cars available at each spot.
+Here, I removed the 0 rows which I think is not useful information. Besides that, add markers to indicate the location of cars on the map.
