@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 The data is coming from a challenge which is described on the website http://www.storytellingwithdata.com/blog/2019/3/1/swdchallenge-visualize-this-data. The challenge is use this dataset to create visuals to answer the question: Who donates? 
-The dataset contains dononation information for 47 countries between 1973 and 2013. This information include amount of donation, the donor country， the recipient country and on which perspective the donation aid.
+The dataset contains donation information for 47 countries between 1973 and 2013. This information include amount of donation, the donor country, the recipient country and on which perspective the donation aid.
 
 Here, I am trying to answer this question with 2 plots.
 
@@ -22,12 +22,16 @@ library(dplyr)
 dd <- read.csv("aiddata-countries-only.csv")
 
 dd1 <- filter(dd, amount>10000000)
-#drop the data with small values since they are not visiable in the plot
+##drop the data with small values since they are not visible in the plot
+## BMB: maybe use 1e7 instead so you don't have to count zeros
+
 
 dd2 <- dd1 %>% 
   group_by(donor) %>%
-  mutate(total_amount = sum(amount)/10000000)
-#change the scale into billions
+  mutate(amount=amount/1e9,
+         total_amount = sum(amount))
+##change the scale into billions
+## BMB: don't you want to scale 'amount' too?
 
 gg1 <- (ggplot(dd2)
        + geom_bar(aes(y=amount,x=reorder(donor,total_amount),fill=recipient),stat="identity")
@@ -47,8 +51,12 @@ Rubics:
 ordering: the order is from the highest amount to lowest amount, so that we can find out who donates the largest amount.
 axis: the axis have been fliped, I think it is more clearly shows the differece in amounts.
 color: different colors used to distingush the donation from different countries.
-Order of legend: The order of legned is alphabetical. I think it does not matter.
+Order of legend: The order of legend is alphabetical. I think it does not matter.
+
+**BMB: OK. Colours are kind of useless here, though. We would probably need a dynamic graphic to be able to distinguish these)**
+
 ```{r}
+dd1 <- mutate(dd1, amount=amount/1e9)
 recipient <- dd1%>%
   group_by(recipient)%>%
   summarise(gain=sum(amount))%>%
@@ -59,8 +67,8 @@ donor <- dd1%>%
   group_by(donor)%>%
   summarise(loss=sum(amount))%>%
   select(country=donor,loss)
-#get the total amount donated from each country from 1973-2013
-  
+##get the total amount donated from each country from 1973-2013
+
 donation <- full_join(donor,recipient,by="country")%>%
   mutate(gain = ifelse(is.na(gain),0,gain)
              , loss=ifelse(is.na(loss),0,loss)
@@ -71,8 +79,12 @@ donation <- full_join(donor,recipient,by="country")%>%
 gg2 <- (ggplot(donation,aes(x=reorder(country,net),y=net))
      + geom_point()+geom_hline(yintercept = 0)
      + coord_flip()+xlab("Country")
-     + ylab("Donation amount I(in billion USD"))
+     + ylab("Donation amount I(in billion USD)"))
 
 print(gg2)
 ```
 The central line in the plot indicates the value of 0. The dots on the right of the line means this country donates more than it received. The dots on the left side of the line means this country received more than it donates. The countries are ordered according to the amount it donates. Obviously, Japan and US are major donors and India and Thailand are major receivers.
+
+**BMB: could have done other things (split by purpose, consider donations per capita or as fraction of GDP, etc etc). But this is OK.  Did you consider the rubric in the second plot?**
+
+**score: 2**
