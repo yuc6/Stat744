@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 The data of this plot comes from https://www.kaggle.com/doit-intl/autotel-shared-car-locations.
 It comes from a shared car service.This dataset contains 5 columns: timestamp, latitude, longitude, # total cars and cars list.
 
-I used this dataset made a plot, which shows the parking place for each car and how many cars available in the neibourhood.
+I used this dataset to make a plot, which shows the parking place for each car and how many cars are available in the neibourhood.
 ```{r}
 library(tidyverse)
 library(dplyr)
@@ -30,3 +30,5 @@ leaflet(shared_cars)%>%
 ```
 This plot can help people find the available cars for share easily. The bubble indicates the location for cars and number inside each bubble indicates the total number of cars available at each spot.
 Here, I removed the 0 rows which I think is not useful information. Besides that, add markers to indicate the location of cars on the map.
+
+**BMB: this satisfies the narrow parameters of the assignment, but you didn't really say much about the graphical choices you made (besides adding markers for the location of cars: but what else were you going to do if you wanted to display car locations ... ??? score: 1.9**
